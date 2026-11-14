@@ -1,0 +1,213 @@
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ui:   <http://lv2plug.in/ns/extensions/ui#> .
+@prefix opts: <http://lv2plug.in/ns/ext/options#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+
+<https://github.com/tylorismusic-commits/brick>
+	a lv2:Plugin ;
+	lv2:binary <brick.so> ;
+	rdfs:seeAlso <brick.ttl> ;
+	ui:ui <https://github.com/tylorismusic-commits/brick#ui> .
+
+<https://github.com/tylorismusic-commits/brick#ui>
+	a ui:X11UI ;
+	ui:binary <brickUI.so> ;
+	lv2:requiredFeature ui:idleInterface , ui:parent ;
+	lv2:optionalFeature ui:resize , opts:options ;
+	lv2:extensionData ui:idleInterface , ui:resize ;
+	opts:supportedOption ui:scaleFactor ;
+	rdfs:seeAlso <brick.ttl> .
+
+<https://github.com/tylorismusic-commits/brick#preset_transparent>
+	a pset:Preset ;
+	lv2:appliesTo <https://github.com/tylorismusic-commits/brick> ;
+	rdfs:label "Transparent Master" ;
+	rdfs:comment "Safe, open master-bus limiting with true-peak detection." ;
+	lv2:port
+		[
+			lv2:symbol "input_gain" ; pset:value 0
+		] ,
+		[
+			lv2:symbol "ceiling" ; pset:value -1
+		] ,
+		[
+			lv2:symbol "release" ; pset:value 200
+		] ,
+		[
+			lv2:symbol "lookahead" ; pset:value 3
+		] ,
+		[
+			lv2:symbol "link" ; pset:value 100
+		] ,
+		[
+			lv2:symbol "true_peak" ; pset:value 1
+		] ,
+		[
+			lv2:symbol "rms_mode" ; pset:value 0
+		] ,
+		[
+			lv2:symbol "enable" ; pset:value 1
+		] ;
+	rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/tylorismusic-commits/brick#preset_loud>
+	a pset:Preset ;
+	lv2:appliesTo <https://github.com/tylorismusic-commits/brick> ;
+	rdfs:label "Loud Master" ;
+	rdfs:comment "More drive and a hotter ceiling for a competitive master." ;
+	lv2:port
+		[
+			lv2:symbol "input_gain" ; pset:value 4
+		] ,
+		[
+			lv2:symbol "ceiling" ; pset:value -0.3
+		] ,
+		[
+			lv2:symbol "release" ; pset:value 100
+		] ,
+		[
+			lv2:symbol "lookahead" ; pset:value 4
+		] ,
+		[
+			lv2:symbol "link" ; pset:value 100
+		] ,
+		[
+			lv2:symbol "true_peak" ; pset:value 1
+		] ,
+		[
+			lv2:symbol "rms_mode" ; pset:value 0
+		] ,
+		[
+			lv2:symbol "enable" ; pset:value 1
+		] ;
+	rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/tylorismusic-commits/brick#preset_drum_bus>
+	a pset:Preset ;
+	lv2:appliesTo <https://github.com/tylorismusic-commits/brick> ;
+	rdfs:label "Drum Bus" ;
+	rdfs:comment "Fast release and a short lookahead for transient-heavy buses." ;
+	lv2:port
+		[
+			lv2:symbol "input_gain" ; pset:value 2
+		] ,
+		[
+			lv2:symbol "ceiling" ; pset:value -0.5
+		] ,
+		[
+			lv2:symbol "release" ; pset:value 50
+		] ,
+		[
+			lv2:symbol "lookahead" ; pset:value 2
+		] ,
+		[
+			lv2:symbol "link" ; pset:value 100
+		] ,
+		[
+			lv2:symbol "true_peak" ; pset:value 0
+		] ,
+		[
+			lv2:symbol "rms_mode" ; pset:value 0
+		] ,
+		[
+			lv2:symbol "enable" ; pset:value 1
+		] ;
+	rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/tylorismusic-commits/brick#preset_true_peak>
+	a pset:Preset ;
+	lv2:appliesTo <https://github.com/tylorismusic-commits/brick> ;
+	rdfs:label "True Peak Safety" ;
+	rdfs:comment "Conservative true-peak ceiling for streaming delivery." ;
+	lv2:port
+		[
+			lv2:symbol "input_gain" ; pset:value 0
+		] ,
+		[
+			lv2:symbol "ceiling" ; pset:value -1
+		] ,
+		[
+			lv2:symbol "release" ; pset:value 300
+		] ,
+		[
+			lv2:symbol "lookahead" ; pset:value 5
+		] ,
+		[
+			lv2:symbol "link" ; pset:value 100
+		] ,
+		[
+			lv2:symbol "true_peak" ; pset:value 1
+		] ,
+		[
+			lv2:symbol "rms_mode" ; pset:value 0
+		] ,
+		[
+			lv2:symbol "enable" ; pset:value 1
+		] ;
+	rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/tylorismusic-commits/brick#preset_rms>
+	a pset:Preset ;
+	lv2:appliesTo <https://github.com/tylorismusic-commits/brick> ;
+	rdfs:label "RMS Smooth" ;
+	rdfs:comment "Smoother RMS-derived gain with peak safety." ;
+	lv2:port
+		[
+			lv2:symbol "input_gain" ; pset:value 2
+		] ,
+		[
+			lv2:symbol "ceiling" ; pset:value -0.5
+		] ,
+		[
+			lv2:symbol "release" ; pset:value 400
+		] ,
+		[
+			lv2:symbol "lookahead" ; pset:value 4
+		] ,
+		[
+			lv2:symbol "link" ; pset:value 100
+		] ,
+		[
+			lv2:symbol "true_peak" ; pset:value 0
+		] ,
+		[
+			lv2:symbol "rms_mode" ; pset:value 1
+		] ,
+		[
+			lv2:symbol "enable" ; pset:value 1
+		] ;
+	rdfs:seeAlso <presets.ttl> .
+
+<https://github.com/tylorismusic-commits/brick#preset_brick>
+	a pset:Preset ;
+	lv2:appliesTo <https://github.com/tylorismusic-commits/brick> ;
+	rdfs:label "Brick Wall" ;
+	rdfs:comment "Maximum drive, minimum release and a hard ceiling." ;
+	lv2:port
+		[
+			lv2:symbol "input_gain" ; pset:value 12
+		] ,
+		[
+			lv2:symbol "ceiling" ; pset:value -0.1
+		] ,
+		[
+			lv2:symbol "release" ; pset:value 10
+		] ,
+		[
+			lv2:symbol "lookahead" ; pset:value 5
+		] ,
+		[
+			lv2:symbol "link" ; pset:value 100
+		] ,
+		[
+			lv2:symbol "true_peak" ; pset:value 1
+		] ,
+		[
+			lv2:symbol "rms_mode" ; pset:value 0
+		] ,
+		[
+			lv2:symbol "enable" ; pset:value 1
+		] ;
+	rdfs:seeAlso <presets.ttl> .
+

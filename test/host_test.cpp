@@ -1,0 +1,169 @@
+// Brick — lilv host integration test
+// SPDX-License-Identifier: GPL-3.0-or-later
+#include <cmath>
+#include <cstdio>
+
+#include <lilv/lilv.h>
+
+#include "inline_display.hpp"
+#include "param_info.hpp"
+
+using namespace brick;
+
+static int g_failures = 0;
+
+static void check(bool ok, const char* what) {
+  if (!ok) {
+    ++g_failures;
+    std::printf("FAIL: %s\n", what);
+  }
+}
+
+int main(int argc, char** argv) {
+  const char* bundleDir = (argc > 1) ? argv[1] : nullptr;
+  if (!bundleDir) {
+    std::printf("usage: %s <bundle-dir>\n", argv[0]);
+    return 2;
+  }
+
+  LilvWorld* world = lilv_world_new();
+  LilvNode* pathNode = lilv_new_string(world, bundleDir);
+  lilv_world_set_option(world, LILV_OPTION_LV2_PATH, pathNode);
+  lilv_node_free(pathNode);
+  lilv_world_load_all(world);
+
+  LilvNode* uri =
+      lilv_new_uri(world, "https://github.com/tylorismusic-commits/brick");
+  const LilvPlugins* plugins = lilv_world_get_all_plugins(world);
+  const LilvPlugin* plugin = lilv_plugins_get_by_uri(plugins, uri);
+  lilv_node_free(uri);
+  check(plugin != nullptr, "plugin found in bundle");
+  if (!plugin) {
+    lilv_world_free(world);
+    return 1;
+  }
+
+  const uint32_t numPorts = lilv_plugin_get_num_ports(plugin);
+  check(numPorts == PORT_COUNT, "port count matches RDF");
+
+  LilvUIs* uis = lilv_plugin_get_uis(plugin);
+  check(lilv_uis_size(uis) >= 1, "at least one UI declared");
+  lilv_uis_free(uis);
+
+  LilvNode* presetClass =
+      lilv_new_uri(world, "http://lv2plug.in/ns/ext/presets#Preset");
+  LilvNodes* presets = lilv_plugin_get_related(plugin, presetClass);
+  check(lilv_nodes_size(presets) >= 6, "factory presets found");
+  lilv_nodes_free(presets);
+  lilv_node_free(presetClass);
+
+  LilvInstance* instance = lilv_plugin_instantiate(plugin, 48000.0, nullptr);
+  check(instance != nullptr, "plugin instantiated");
+  if (!instance) {
+    lilv_world_free(world);
+    return 1;
+  }
+
+  const uint32_t block = 256;
+  float audioInL[block];
+  float audioInR[block];
+  float audioOutL[block];
+  float audioOutR[block];
+  float ctrl[PORT_COUNT] = {};
+
+  for (uint32_t i = 0; i < PORT_COUNT; ++i) {
+    if (i < 4) {
+      void* ptr = (i == 0) ? static_cast<void*>(audioInL)
+                  : (i == 1) ? static_cast<void*>(audioInR)
+                  : (i == 2) ? static_cast<void*>(audioOutL)
+                             : static_cast<void*>(audioOutR);
+      lilv_instance_connect_port(instance, i, ptr);
+    } else {
+      lilv_instance_connect_port(instance, i, &ctrl[i]);
+    }
+  }
+
+  ctrl[PORT_INPUT_GAIN] = 6.0f;
+  ctrl[PORT_CEILING] = -1.0f;
+  ctrl[PORT_RELEASE] = 100.0f;
+  ctrl[PORT_LOOKAHEAD] = 3.0f;
+  ctrl[PORT_LINK] = 100.0f;
+  ctrl[PORT_TRUE_PEAK] = 1.0f;
+  ctrl[PORT_RMS_MODE] = 0.0f;
+  ctrl[PORT_ENABLE] = 1.0f;
+
+  lilv_instance_activate(instance);
+
+  for (uint32_t b = 0; b < 8; ++b) {
+    for (uint32_t i = 0; i < block; ++i) {
+      const float x = std::sin(2.0f * 3.14159265358979f * 1000.0f *
+                               (b * block + i) / 48000.0f) * 0.75f;
+      audioInL[i] = x;
+      audioInR[i] = x;
+    }
+    lilv_instance_run(instance, block);
+  }
+  bool finite = true;
+  for (uint32_t i = 0; i < block; ++i) {
+    finite = finite && std::isfinite(audioOutL[i]) && std::isfinite(audioOutR[i]);
+  }
+  check(finite, "host run produces finite audio");
+  check(std::isfinite(ctrl[PORT_METER_OUT]), "output meter finite");
+  check(std::isfinite(ctrl[PORT_METER_GR]), "GR meter finite");
+  check(std::isfinite(ctrl[PORT_METER_IN]), "input meter finite");
+  check(std::isfinite(ctrl[PORT_METER_TRUE_PEAK]), "true-peak meter finite");
+  check(std::isfinite(ctrl[PORT_METER_RMS]), "RMS meter finite");
+  check(std::fabs(ctrl[PORT_LATENCY] - 240.0f) < 1.0f,
+        "latency port reports the 5 ms lookahead");
+  check(ctrl[PORT_METER_GR] < -1.0f, "gain reduction is reported");
+
+  {
+    const auto* iface = static_cast<const InlineDisplayInterface*>(
+        lilv_instance_get_extension_data(instance, kInlineDisplayInterfaceURI));
+    check(iface && iface->render, "inline display extension available");
+    if (iface && iface->render) {
+      auto* surface = iface->render(lilv_instance_get_handle(instance), 320, 40);
+      check(surface && surface->width == 320 && surface->height == 40,
+            "inline display renders a surface");
+    }
+  }
+
+  // Flat chain with a quiet signal should stay near unity.
+  ctrl[PORT_INPUT_GAIN] = 0.0f;
+  ctrl[PORT_CEILING] = -1.0f;
+  for (int b = 0; b < 60; ++b) {
+    for (uint32_t i = 0; i < block; ++i) {
+      const float x = std::sin(2.0f * 3.14159265358979f * 1000.0f *
+                               (b * block + i) / 48000.0f) * 0.1f;
+      audioInL[i] = x;
+      audioInR[i] = x;
+    }
+    lilv_instance_run(instance, block);
+  }
+  float peak = 0.0f;
+  for (uint32_t i = 0; i < block; ++i) {
+    peak = std::max(peak, std::fabs(audioOutL[i]));
+  }
+  check(peak > 0.09f && peak < 0.115f, "quiet signal is transparent");
+
+  // Bypass must pass the dry signal through, with the fixed latency.
+  ctrl[PORT_ENABLE] = 0.0f;
+  for (int b = 0; b < 80; ++b) {
+    for (uint32_t i = 0; i < block; ++i) {
+      audioInL[i] = 0.05f;
+      audioInR[i] = 0.05f;
+    }
+    lilv_instance_run(instance, block);
+  }
+  check(std::fabs(audioOutL[block - 1] - 0.05f) < 0.002f,
+        "host bypass passes dry signal");
+
+  lilv_instance_deactivate(instance);
+  lilv_instance_free(instance);
+  lilv_world_free(world);
+
+  if (g_failures == 0) {
+    std::printf("ALL HOST TESTS PASSED\n");
+  }
+  return g_failures == 0 ? 0 : 1;
+}
