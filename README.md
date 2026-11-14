@@ -2,7 +2,7 @@
 
 [![build](https://github.com/tylorismusic-commits/brick/actions/workflows/build.yml/badge.svg)](https://github.com/tylorismusic-commits/brick/actions/workflows/build.yml)
 
-**Version 0.1.1** · [GitHub](https://github.com/tylorismusic-commits/brick) · GPL-3.0-or-later
+**Version 0.2.0** · [GitHub](https://github.com/tylorismusic-commits/brick) · GPL-3.0-or-later
 
 **Brick** is a free, open-source LV2/CLAP lookahead limiter for Linux: a modern,
 transparent mastering limiter with optional true-peak detection and an RMS
@@ -109,6 +109,14 @@ GR is exposed on the output ports and through Ardour's inline display.
 | **True Peak Safety** | Conservative true-peak ceiling for streaming delivery |
 | **RMS Smooth** | Smoother RMS-derived gain with peak safety |
 | **Brick Wall** | Maximum drive, minimum release and a hard ceiling |
+
+## Skins
+
+The swatch or `SKIN` chip in the plugin header cycles the suite skin. The free
+Classic theme is built in. Additional skins can be installed in
+`~/.local/share/hearth/skins/<skin>/` with a `palette.ini`; the selection is
+shared across the Hearth suite and stored in `~/.config/hearth/skins.conf`.
+Skins change only the UI colors and artwork, never the audio or project state.
 
 ## Build
 

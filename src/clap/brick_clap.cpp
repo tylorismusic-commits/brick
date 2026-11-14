@@ -193,7 +193,7 @@ struct ClapPlugin {
         "https://github.com/tylorismusic-commits/brick",
         "",
         "https://github.com/tylorismusic-commits/brick/issues",
-        "0.1.1",
+        "0.2.0",
         "Transparent lookahead peak limiter with true-peak and RMS modes.",
         features};
     return desc;
