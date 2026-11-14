@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Fixed the IN/BYPASS button position so it stays inside the UI canvas.
+
 ## 0.1.0
 
 - Initial release.

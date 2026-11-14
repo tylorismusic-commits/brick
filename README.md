@@ -2,7 +2,7 @@
 
 [![build](https://github.com/tylorismusic-commits/brick/actions/workflows/build.yml/badge.svg)](https://github.com/tylorismusic-commits/brick/actions/workflows/build.yml)
 
-**Version 0.1.0** · [GitHub](https://github.com/tylorismusic-commits/brick) · GPL-3.0-or-later
+**Version 0.1.1** · [GitHub](https://github.com/tylorismusic-commits/brick) · GPL-3.0-or-later
 
 **Brick** is a free, open-source LV2/CLAP lookahead limiter for Linux: a modern,
 transparent mastering limiter with optional true-peak detection and an RMS

@@ -111,7 +111,7 @@ constexpr Widget kWidgets[] = {
     M(PORT_METER_GR, 584.0f, 380.0f, 14.0f, 460.0f),
 
     // Global
-    T(PORT_ENABLE, 528.0f, 22.0f, 96.0f, 32.0f),
+    T(PORT_ENABLE, 512.0f, 22.0f, 88.0f, 32.0f),
 };
 
 constexpr int kNumWidgets = static_cast<int>(sizeof(kWidgets) / sizeof(kWidgets[0]));
@@ -1313,7 +1313,7 @@ static void drawHeader(cairo_t* cr, const State& s) {
   drawPresetBar(cr, s);
   textAt(cr, 430.0, 42.0, "LIMIT", 6.5, true, kMuted);
   textAt(cr, 430.0, 52.0, "MASTER", 6.5, false, kMuted);
-  textAt(cr, 430.0, 62.0, "v0.1", 5.5, false, kMuted);
+  textAt(cr, 430.0, 62.0, "v0.1.1", 5.5, false, kMuted);
 
   // brushed-metal strip along the bottom of the header
   cairo_pattern_t* strip = cairo_pattern_create_linear(0, 76, 0, 80);
